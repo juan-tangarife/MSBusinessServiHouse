@@ -1,0 +1,11 @@
+services:
+  ms-business:
+    build:
+      context: .
+      args:
+        BUILDPLATFORM: linux/arm64
+    platform: linux/arm64
+    ports:
+      - "${PORT}:${PORT}"
+    env_file:
+      - .env
