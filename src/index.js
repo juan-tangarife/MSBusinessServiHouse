@@ -6,6 +6,7 @@ const {swaggerUi, swaggerDocs} = require("./middlewares/swagger.js")
 
 const app = express();
 const port = process.env.PORT;
+app.use(express.json());
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 app.listen(port, () => {
     console.log(`Project running ${port}`); 

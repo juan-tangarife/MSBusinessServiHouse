@@ -1,9 +1,10 @@
 const { PrismaClient } = require('@prisma/client'); //Importamos el cliente de prisma
 const prisma = new PrismaClient(); //Creamos una instancia del cliente de prisma
 require("dotenv").config(); //Nos permite leer las variables de entorno
-const e = require('express');
+const express = require('express');
 
 const createDelivery = async (req, res) => {
+    console.log(req.body);
     //const { message, success } = verifyToken(req, 'createOrder'); //Verificamos el token
     if (!req.body || Object.keys(req.body).length === 0) { 
         return res.status(400).json({
