@@ -24,6 +24,7 @@ const createOrder = async (req, res) => {
     }
     
     let { order_number, delivery_id, final_address_id } = req.body; 
+    //order_number no es requerido en el body, se tiene que generar automaticamente
     try {
         const delivery = await prisma.delivery.findFirst({
             where: {
