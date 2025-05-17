@@ -23,13 +23,17 @@ model Order {
 model Stock {
   id                Int                @id @default(autoincrement())
   amount            Int
-  product_id        Int
-  storage_id        Int
-  stockTransactions StockTransaction[]
+  product_id        String
+  storage_id        String
+  dispatcher_id     Int?
+  stockTransactions StockTransaction[] 
+  min_amount       Int?
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @default(now()) @updatedAt
   Product           Product            @relation(fields: [product_id], references: [id])
   Storage           Storage            @relation(fields: [storage_id], references: [id])
+  Dispatcher         Dispatcher?         @relation(fields: [dispatcher_id], references: [id])
+  @@unique([product_id, storage_id])
 }
 
 model StockTransaction {
@@ -37,6 +41,7 @@ model StockTransaction {
   amount    Int
   stock_id  Int
   order_id  Int
+  restock   Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
   Order     Order    @relation(fields: [order_id], references: [id])
@@ -54,7 +59,7 @@ model Delivery {
 
 model Location {
   id         Int        @id @default(autoincrement())
-  altitude   String
+  altitude   String     
   latitude   String
   static     Boolean
   address    String
@@ -65,36 +70,43 @@ model Location {
   storage    Storage[]
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @default(now()) @updatedAt
+  @@unique([latitude, altitude])
 }
 
 model Product {
-  id          Int      @id @default(autoincrement())
+  id          String  @id
   name        String
   category    String
   description String
-  price       Decimal
+  price       Decimal  @db.Decimal(10, 2)
   picture     String
   stock       Stock[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @default(now()) @updatedAt
+  fragile    Boolean
+  providerProducts ProviderProduct[]
 }
 
 model Storage {
-  id          Int      @id @default(autoincrement())
+  id          String   @id
   name        String
-  admin_id    Int
+  manager_id    Int
   location_id Int
+  capacity   Int
   stock       Stock[]
   location    Location @relation(fields: [location_id], references: [id])
-  admin       Admin    @relation(fields: [admin_id], references: [id])
+  manager       Manager    @relation(fields: [manager_id], references: [id])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @default(now()) @updatedAt
 }
 
-model Admin {
+model Manager {
   id        Int       @id @default(autoincrement())
   user_id   String
   full_name String
+  state   String
+  email     String @unique
+  phone     String    
   Storage   Storage[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @default(now()) @updatedAt
@@ -117,4 +129,34 @@ model MessageTemplates {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
   isActive  Boolean  @default(true)
+}
+
+model Provider {
+  id        String   @id
+  name     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  providerProducts ProviderProduct[]
+}
+
+model ProviderProduct {
+  id        Int      @id @default(autoincrement())
+  product_id String 
+  provider_id String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  Product   Product  @relation(fields: [product_id], references: [id])
+  Provider  Provider @relation(fields: [provider_id], references: [id])
+  @@unique([product_id, provider_id])
+}
+
+model Dispatcher {
+  id        Int      @id @default(autoincrement())
+  user_id   String?
+  full_name String
+  email     String @unique
+  phone     String    
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  Stock     Stock[]
 }

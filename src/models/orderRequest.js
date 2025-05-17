@@ -1,26 +1,56 @@
 class orderRequest {
-    constructor(order_number, delivery_id, final_address_id) {
-        this.order_number = order_number;
-        this.delivery_id = delivery_id;
-        this.final_address_id = final_address_id;
+    constructor(address, city, department, altitude, latitude, products, restock) {
+        this.address = address;
+        this.city = city;
+        this.department = department;
+        this.altitude = altitude;
+        this.latitude = latitude;
+        this.products = products;
+        this.restock = restock;
     }
   
     static validate(data) {
-        const { order_number, delivery_id, final_address_id } = data;
+        const {address, city, department, altitude, latitude, products, restock} = data;
         const errors = [];
   
-        if (!order_number || order_number.length < 10) {
-            errors.push("Order number must be at least 10 characters long.");
+        if (!address) {
+            errors.push("Address is required");
         }
-  
-        if (!delivery_id) {
-            errors.push("Delivery ID is required.");
+        if (!city) {
+            errors.push("City is required");
         }
-  
-        if (!final_address_id) {
-            errors.push("Final address ID is required.");
+        if (!department) {
+            errors.push("Department is required");
         }
-        return errors.length > 0 ? errors : null;
+        if (!altitude) {
+            errors.push("Altitude is required");
+        }
+        if (!latitude) {
+            errors.push("Latitude is required");
+        }
+        if (!products || products.length === 0) {
+            errors.push("Products are required");
+        } else {
+            products.forEach((product, index) => {
+                if (!product.product_id) {
+                    errors.push(`Product ID is required for product ${index + 1}`);
+                }
+                if (!product.amount) {
+                    errors.push(`Amount is required for product ${index + 1}`);
+                }
+                if (!product.storage_id) {
+                    errors.push(`Storage ID is required for product ${index + 1}`);
+                }   
+            });
+        }
+        if (restock === undefined) {
+            errors.push("Restock is required");
+        } else if (typeof restock !== "boolean") {
+            errors.push("Restock must be a boolean");
+        }
+        if (errors.length > 0) {
+            return errors;
+        }
     }
   }
   
