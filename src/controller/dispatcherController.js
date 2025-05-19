@@ -210,10 +210,44 @@ const deleteDispatcher = async (req, res) => {
     }
 }
 
+const getStockByDispatcher = async (req, res) => {
+    //const { message, success } = verifyToken(req, 'getOrders'); //Verificamos el token
+    const { id } = req.params;
+    try {
+        const stock = await prisma.stock.findMany({
+            where: {
+                dispatcher_id: parseInt(id)
+            }
+        });
+        if (!stock) {
+            return res.status(404).json({
+                success: false,
+                status: 404,
+                message: "Stock not found"
+            })
+        }
+        res.status(200).json({
+            success: true,
+            status: 200,
+            message: "Stock retrieved successfully",
+            data: stock
+        })
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            success: false,
+            status: 500,
+            message: "Error retrieving stock",
+            error: error.message
+        })
+    }
+}
+
 module.exports = {
     createDispatcher,
     getDispatchers,
     getDispatcherById,
     updateDispatcher,
-    deleteDispatcher
+    deleteDispatcher,
+    getStockByDispatcher
 };
