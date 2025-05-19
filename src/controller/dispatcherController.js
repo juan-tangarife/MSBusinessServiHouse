@@ -217,6 +217,9 @@ const getStockByDispatcher = async (req, res) => {
         const stock = await prisma.stock.findMany({
             where: {
                 dispatcher_id: parseInt(id)
+            }, 
+            include:{
+                Product: true
             }
         });
         if (!stock) {
