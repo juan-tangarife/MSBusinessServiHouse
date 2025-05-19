@@ -104,11 +104,19 @@ model Storage {
 
 model Manager {
   id        Int       @id @default(autoincrement())
+<<<<<<< HEAD
   user_id   String
   full_name String
   state     String
   email     String    @unique
   phone     String
+=======
+  user_id   String?
+  full_name String 
+  state   String     @default("ACTIVE")
+  email     String @unique
+  phone     String    
+>>>>>>> 5193674a77b76b0a3d9c9981a906bf46ea8cde4f
   Storage   Storage[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @default(now()) @updatedAt
@@ -134,10 +142,17 @@ model MessageTemplates {
 }
 
 model Provider {
+<<<<<<< HEAD
   id               String            @id
   name             String
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @default(now()) @updatedAt
+=======
+  id        String   @id
+  name     String  @unique  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+>>>>>>> 5193674a77b76b0a3d9c9981a906bf46ea8cde4f
   providerProducts ProviderProduct[]
 }
 
