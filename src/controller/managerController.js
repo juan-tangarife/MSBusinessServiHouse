@@ -3,103 +3,112 @@ const prisma = new PrismaClient(); //Creamos una instancia del cliente de prisma
 require("dotenv").config(); //Nos permite leer las variables de entorno
 const e = require('express');
 
-const createLocation = async (req, res) => {
+const createManager = async (req, res) => {
     //const { message, success } = verifyToken(req, 'createOrder'); //Verificamos el token
-    if (!req.body || Object.keys(req.body).length === 0) { 
+    if (!req.body || Object.keys(req.body).length === 0) {
         return res.status(400).json({
             success: false,
             status: 400,
             message: "Request body is required"
         })
     }
-    
-    let { altitude, latitude, static, address, city, department } = req.body; 
+
+    let { full_name, email, phone } = req.body;
     try {
-        const location = await prisma.location.create({
+        const emailExists = await prisma.manager.findUnique({
+            where: {
+                email
+            }
+        });
+        if (emailExists) {
+            return res.status(400).json({
+                success: false,
+                status: 400,
+                message: "Email already registered in manager"
+            })
+        }
+
+        const manager = await prisma.manager.create({
             data: {
-                altitude, 
-                latitude, 
-                static,
-                address,
-                city,
-                department
-            },
+                full_name,
+                email,
+                phone,
+            }
         });
         res.status(201).json({
             success: true,
             status: 201,
-            message: "Location created successfully",
+            message: "Manager created successfully",
         })
     } catch (error) {
         console.log(error);
-        
+
         res.status(500).json({
             success: false,
             status: 500,
-            message: "Delivery creation failed",
+            message: "Error creating manager",
             error: error.message
         })
     }
 }
 
-const getLocations = async (req, res) => {
+const getManagers = async (req, res) => {
     //const { message, success } = verifyToken(req, 'getOrders'); //Verificamos el token
     try {
-        const locations = await prisma.location.findMany();
+        const managers = await prisma.manager.findMany();
         res.status(200).json({
             success: true,
             status: 200,
-            message: "Locations retrieved successfully",
-            data: locations
+            message: "Managers retrieved successfully",
+            data: managers
         })
     } catch (error) {
         console.log(error);
-        
         res.status(500).json({
             success: false,
             status: 500,
-            message: "Error retrieving locations",
+            message: "Error retrieving managers",
             error: error.message
         })
     }
 }
 
-const getLocationById = async (req, res) => {
+
+const getManagerById = async (req, res) => {
     //const { message, success } = verifyToken(req, 'getOrders'); //Verificamos el token
     const { id } = req.params;
     try {
-        const location = await prisma.location.findUnique({
+        const manager = await prisma.manager.findUnique({
             where: {
                 id: parseInt(id)
             }
         });
-        if (!location) {
+        if (!manager) {
             return res.status(404).json({
                 success: false,
                 status: 404,
-                message: "Location not found"
+                message: "Manager not found"
             })
         }
         res.status(200).json({
             success: true,
             status: 200,
-            message: "Location retrieved successfully",
-            data: location
+            message: "Manager retrieved successfully",
+            data: manager
         })
     } catch (error) {
         console.log(error);
-        
         res.status(500).json({
             success: false,
             status: 500,
-            message: "Error retrieving location",
+            message: "Error retrieving manager",
             error: error.message
         })
     }
 }
 
-const updateLocation = async (req, res) => {
-    //const { message, success } = verifyToken(req, 'getOrders'); //Verificamos el token
+const updateManager = async (req, res) => {
+    //const { message, success } = verifyToken(req, 'updateOrder'); //Verificamos el token
     const { id } = req.params;
     if (!req.body || Object.keys(req.body).length === 0) {
         return res.status(400).json({
@@ -108,44 +117,39 @@ const updateLocation = async (req, res) => {
             message: "Request body is required"
         })
     }
-    let { altitude, latitude, static, address, city, department } = req.body;
+    let { full_name, email, phone } = req.body;
     try {
-        const location = await prisma.location.update({
+        const manager = await prisma.manager.update({
             where: {
                 id: parseInt(id)
             },
             data: {
-                altitude,
-                latitude,
-                static,
-                address,
-                city,
-                department
+                full_name,
+                email,
+                phone
             }
         });
         res.status(200).json({
             success: true,
             status: 200,
-            message: "Location updated successfully",
-            data: location
+            message: "Manager updated successfully",
         })
     } catch (error) {
         console.log(error);
-        
         res.status(500).json({
             success: false,
             status: 500,
-            message: "Error updating location",
+            message: "Error updating manager",
             error: error.message
         })
     }
 }
 
-const deleteLocation = async (req, res) => {
-    //const { message, success } = verifyToken(req, 'getOrders'); //Verificamos el token
+const deleteManager = async (req, res) => {
+    //const { message, success } = verifyToken(req, 'deleteOrder'); //Verificamos el token
     const { id } = req.params;
     try {
-        const location = await prisma.location.delete({
+        const manager = await prisma.manager.delete({
             where: {
                 id: parseInt(id)
             }
@@ -153,25 +157,23 @@ const deleteLocation = async (req, res) => {
         res.status(200).json({
             success: true,
             status: 200,
-            message: "Location deleted successfully",
-            data: location
+            message: "Manager deleted successfully",
         })
     } catch (error) {
         console.log(error);
-        
         res.status(500).json({
             success: false,
             status: 500,
-            message: "Error deleting location",
+            message: "Error deleting manager",
             error: error.message
         })
     }
 }
 
 module.exports = {
-    createLocation,
-    getLocations,
-    getLocationById,
-    updateLocation,
-    deleteLocation
-};
+    createManager,
+    getManagers,
+    getManagerById,
+    updateManager,
+    deleteManager
+}
