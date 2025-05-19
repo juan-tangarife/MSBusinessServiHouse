@@ -13,11 +13,11 @@ const createProvider = async (req, res) => {
         })
     }
     
-    let { name} = req.body; 
+    let { name, id} = req.body; 
     try {
         const providerExists = await prisma.provider.findUnique({
             where: {
-                name
+                id
             }
         });
         if (providerExists) {
@@ -28,8 +28,9 @@ const createProvider = async (req, res) => {
             })
         }
 
-        const provider = await prisma.manager.create({
+        const provider = await prisma.provider.create({
             data: {
+                id,
                 name
             }
         });
