@@ -1,9 +1,9 @@
 const { PrismaClient } = require('@prisma/client'); //Importamos el cliente de prisma
 const prisma = new PrismaClient(); //Creamos una instancia del cliente de prisma
 require("dotenv").config(); //Nos permite leer las variables de entorno
-const express = require('express');
+const e = require('express');
 
-const createDispatcher = async (req, res) => {
+const createManager = async (req, res) => {
     //const { message, success } = verifyToken(req, 'createOrder'); //Verificamos el token
     if (!req.body || Object.keys(req.body).length === 0) { 
         return res.status(400).json({
@@ -12,18 +12,10 @@ const createDispatcher = async (req, res) => {
             message: "Request body is required"
         })
     }
-    if (!req.body.full_name || !req.body.email || !req.body.phone) {
-        return res.status(400).json({
-            success: false,
-            status: 400,
-            message: "Full name, email and phone are required"
-        })
-    }
-    let { full_name, email, phone } = req.body;
-
+    
+    let { full_name, email, phone } = req.body; 
     try {
-
-        const emailExists = await prisma.dispatcher.findUnique({
+        const emailExists = await prisma.manager.findUnique({
             where: {
                 email
             }
@@ -32,114 +24,102 @@ const createDispatcher = async (req, res) => {
             return res.status(400).json({
                 success: false,
                 status: 400,
-                message: "Email already registered in dispatcher"
+                message: "Email already registered in manager"
             })
         }
-        const dispatcher = await prisma.dispatcher.create({
+
+        const manager = await prisma.manager.create({
             data: {
-                full_name, 
+                full_name,
                 email,
                 phone
-            },
+            }
         });
-        if (!dispatcher) {
-            return res.status(400).json({
-                success: false,
-                status: 400,
-                message: "Dispatcher not created"
-            });
-        }
         res.status(201).json({
             success: true,
             status: 201,
-            message: "Dispatcher created successfully",
+            message: "Manager created successfully",
         })
-
-    } catch (error) {        
+    } catch (error) {
+        console.log(error);
+        
         res.status(500).json({
             success: false,
             status: 500,
-            message: "Dispatcher creation failed",
+            message: "Error creating manager",
             error: error.message
         })
     }
 }
 
-const getDispatchers = async (req, res) => {
+const getManagers = async (req, res) => {
     //const { message, success } = verifyToken(req, 'getOrders'); //Verificamos el token
     try {
-        const dispatchers = await prisma.dispatcher.findMany();
+        const managers = await prisma.manager.findMany();
         res.status(200).json({
             success: true,
             status: 200,
-            message: "Dispatchers retrieved successfully",
-            data: dispatchers
+            message: "Managers retrieved successfully",
+            data: managers
         })
     } catch (error) {
         console.log(error);
         res.status(500).json({
             success: false,
             status: 500,
-            message: "Error retrieving dispatchers",
+            message: "Error retrieving managers",
             error: error.message
         })
     }
 }
 
-const getDispatcherById = async (req, res) => {
+
+const getManagerById = async (req, res) => {
     //const { message, success } = verifyToken(req, 'getOrders'); //Verificamos el token
     const { id } = req.params;
     try {
-        const dispatcher = await prisma.dispatcher.findUnique({
+        const manager = await prisma.manager.findUnique({
             where: {
                 id: parseInt(id)
             }
         });
-        if (!dispatcher) {
+        if (!manager) {
             return res.status(404).json({
                 success: false,
                 status: 404,
-                message: "Dispatcher not found"
+                message: "Manager not found"
             })
         }
         res.status(200).json({
             success: true,
             status: 200,
-            message: "Dispatcher retrieved successfully",
-            data: dispatcher
+            message: "Manager retrieved successfully",
+            data: manager
         })
     } catch (error) {
         console.log(error);
         res.status(500).json({
             success: false,
             status: 500,
-            message: "Error retrieving dispatcher",
+            message: "Error retrieving manager",
             error: error.message
         })
     }
 }
 
-const updateDispatcher = async (req, res) => {
-    //const { message, success } = verifyToken(req, 'getOrders'); //Verificamos el token
+const updateManager = async (req, res) => {
+    //const { message, success } = verifyToken(req, 'updateOrder'); //Verificamos el token
     const { id } = req.params;
-    if (!req.body || Object.keys(req.body).length === 0) {
+    if (!req.body || Object.keys(req.body).length === 0) { 
         return res.status(400).json({
             success: false,
             status: 400,
             message: "Request body is required"
         })
     }
-    if (!req.body.full_name || !req.body.email || !req.body.phone) {
-        return res.status(400).json({
-            success: false,
-            status: 400,
-            message: "Full name, email and phone are required"
-        })
-    }
-    let { full_name, email, phone } = req.body;
-
+    let { full_name, email, phone } = req.body; 
     try {
-        const dispatcher = await prisma.dispatcher.update({
+        const manager = await prisma.manager.update({
             where: {
                 id: parseInt(id)
             },
@@ -149,47 +129,27 @@ const updateDispatcher = async (req, res) => {
                 phone
             }
         });
-        if (!dispatcher) {
-            return res.status(400).json({
-                success: false,
-                status: 400,
-                message: "Dispatcher not updated"
-            });
-        }
         res.status(200).json({
             success: true,
             status: 200,
-            message: "Dispatcher updated successfully",
+            message: "Manager updated successfully",
         })
-
     } catch (error) {
         console.log(error);
         res.status(500).json({
             success: false,
             status: 500,
-            message: "Dispatcher update failed",
+            message: "Error updating manager",
             error: error.message
         })
     }
 }
 
-const deleteDispatcher = async (req, res) => {
-    //const { message, success } = verifyToken(req, 'getOrders'); //Verificamos el token
+const deleteManager = async (req, res) => {
+    //const { message, success } = verifyToken(req, 'deleteOrder'); //Verificamos el token
     const { id } = req.params;
     try {
-        const dispatcherExists = await prisma.dispatcher.findUnique({
-            where: {
-                id: parseInt(id)
-            }
-        });
-        if (!dispatcherExists) {
-            return res.status(404).json({
-                success: false,
-                status: 404,
-                message: "Dispatcher not found"
-            })
-        }
-        const dispatcher = await prisma.dispatcher.delete({
+        const manager = await prisma.manager.delete({
             where: {
                 id: parseInt(id)
             }
@@ -197,23 +157,23 @@ const deleteDispatcher = async (req, res) => {
         res.status(200).json({
             success: true,
             status: 200,
-            message: "Dispatcher deleted successfully",
+            message: "Manager deleted successfully",
         })
     } catch (error) {
         console.log(error);
         res.status(500).json({
             success: false,
             status: 500,
-            message: "Error deleting dispatcher",
+            message: "Error deleting manager",
             error: error.message
         })
     }
 }
 
 module.exports = {
-    createDispatcher,
-    getDispatchers,
-    getDispatcherById,
-    updateDispatcher,
-    deleteDispatcher
-};
+    createManager,
+    getManagers,
+    getManagerById,
+    updateManager,
+    deleteManager
+}

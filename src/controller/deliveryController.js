@@ -52,6 +52,146 @@ const createDelivery = async (req, res) => {
     }
 }
 
+const getDeliveries = async (req, res) => {
+    //const { message, success } = verifyToken(req, 'getOrders'); //Verificamos el token
+    try {
+        const deliveries = await prisma.delivery.findMany();
+        res.status(200).json({
+            success: true,
+            status: 200,
+            message: "Deliveries retrieved successfully",
+            data: deliveries
+        })
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            success: false,
+            status: 500,
+            message: "Error retrieving deliveries",
+            error: error.message
+        })
+    }
+}
+
+const getDeliveryById = async (req, res) => {
+    //const { message, success } = verifyToken(req, 'getOrders'); //Verificamos el token
+    const { id } = req.params;
+    try {
+        const delivery = await prisma.delivery.findUnique({
+            where: {
+                id: parseInt(id)
+            }
+        });
+        if (!delivery) {
+            return res.status(400).json({
+                success: false,
+                status: 400,
+                message: "Delivery not found"
+            });
+        }
+        res.status(200).json({
+            success: true,
+            status: 200,
+            message: "Delivery retrieved successfully",
+            data: delivery
+        })
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            success: false,
+            status: 500,
+            message: "Error retrieving delivery",
+            error: error.message
+        })
+    }
+}
+
+const updateDelivery = async (req, res) => {
+    //const { message, success } = verifyToken(req, 'getOrders'); //Verificamos el token
+    const { id } = req.params;
+    const { full_name, location_id } = req.body;
+    try {
+        const delivery = await prisma.delivery.findUnique({
+            where: {
+                id: parseInt(id)
+            }
+        });
+        if (!delivery) {
+            return res.status(400).json({
+                success: false,
+                status: 400,
+                message: "Delivery not found"
+            });
+        }
+        const updatedDelivery = await prisma.delivery.update({
+            where: {
+                id: parseInt(id)
+            },
+            data: {
+                full_name,
+                location_id
+            }
+        });
+        res.status(200).json({
+            success: true,
+            status: 200,
+            message: "Delivery updated successfully",
+            data: updatedDelivery
+        })
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            success: false,
+            status: 500,
+            message: "Error updating delivery",
+            error: error.message
+        })
+    }
+}
+
+const deleteDelivery = async (req, res) => {
+    //const { message, success } = verifyToken(req, 'getOrders'); //Verificamos el token
+    const { id } = req.params;
+    try {
+        const deliveryExists = await prisma.delivery.findUnique({
+            where: {
+                id: parseInt(id)
+            }
+        });
+        if (!deliveryExists) {
+            return res.status(404).json({
+                success: false,
+                status: 404,
+                message: "Delivery not found"
+            })
+        }
+        await prisma.delivery.delete({
+            where: {
+                id: parseInt(id)
+            }
+        });
+        res.status(200).json({
+            success: true,
+            status: 200,
+            message: "Delivery deleted successfully",
+        })
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            success: false,
+            status: 500,
+            message: "Error deleting delivery",
+            error: error.message
+        })
+    }
+}
+
+
 module.exports = {
-    createDelivery
+    createDelivery,
+    getDeliveries,
+    getDeliveryById,
+    updateDelivery,
+    deleteDelivery
+    
 };

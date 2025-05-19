@@ -1,9 +1,9 @@
 const { PrismaClient } = require('@prisma/client'); //Importamos el cliente de prisma
 const prisma = new PrismaClient(); //Creamos una instancia del cliente de prisma
 require("dotenv").config(); //Nos permite leer las variables de entorno
-const express = require('express');
+const e = require('express');
 
-const createDispatcher = async (req, res) => {
+const createProvider = async (req, res) => {
     //const { message, success } = verifyToken(req, 'createOrder'); //Verificamos el token
     if (!req.body || Object.keys(req.body).length === 0) { 
         return res.status(400).json({
@@ -12,115 +12,99 @@ const createDispatcher = async (req, res) => {
             message: "Request body is required"
         })
     }
-    if (!req.body.full_name || !req.body.email || !req.body.phone) {
-        return res.status(400).json({
-            success: false,
-            status: 400,
-            message: "Full name, email and phone are required"
-        })
-    }
-    let { full_name, email, phone } = req.body;
-
+    
+    let { name} = req.body; 
     try {
-
-        const emailExists = await prisma.dispatcher.findUnique({
+        const providerExists = await prisma.provider.findUnique({
             where: {
-                email
+                name
             }
         });
-        if (emailExists) {
+        if (providerExists) {
             return res.status(400).json({
                 success: false,
                 status: 400,
-                message: "Email already registered in dispatcher"
+                message: "Provider already registered"
             })
         }
-        const dispatcher = await prisma.dispatcher.create({
+
+        const provider = await prisma.manager.create({
             data: {
-                full_name, 
-                email,
-                phone
-            },
+                name
+            }
         });
-        if (!dispatcher) {
-            return res.status(400).json({
-                success: false,
-                status: 400,
-                message: "Dispatcher not created"
-            });
-        }
         res.status(201).json({
             success: true,
             status: 201,
-            message: "Dispatcher created successfully",
-        })
-
-    } catch (error) {        
-        res.status(500).json({
-            success: false,
-            status: 500,
-            message: "Dispatcher creation failed",
-            error: error.message
-        })
-    }
-}
-
-const getDispatchers = async (req, res) => {
-    //const { message, success } = verifyToken(req, 'getOrders'); //Verificamos el token
-    try {
-        const dispatchers = await prisma.dispatcher.findMany();
-        res.status(200).json({
-            success: true,
-            status: 200,
-            message: "Dispatchers retrieved successfully",
-            data: dispatchers
+            message: "Provider created successfully",
         })
     } catch (error) {
         console.log(error);
         res.status(500).json({
             success: false,
             status: 500,
-            message: "Error retrieving dispatchers",
+            message: "Error creating provider",
             error: error.message
         })
     }
 }
 
-const getDispatcherById = async (req, res) => {
+const getProviders = async (req, res) => {
+    //const { message, success } = verifyToken(req, 'getOrders'); //Verificamos el token
+    try {
+        const providers = await prisma.provider.findMany();
+        res.status(200).json({
+            success: true,
+            status: 200,
+            message: "Providers retrieved successfully",
+            data: providers
+        })
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            success: false,
+            status: 500,
+            message: "Error retrieving providers",
+            error: error.message
+        })
+    }
+}
+
+const getProviderById = async (req, res) => {
     //const { message, success } = verifyToken(req, 'getOrders'); //Verificamos el token
     const { id } = req.params;
     try {
-        const dispatcher = await prisma.dispatcher.findUnique({
+        const provider = await prisma.provider.findUnique({
             where: {
                 id: parseInt(id)
             }
         });
-        if (!dispatcher) {
+        if (!provider) {
             return res.status(404).json({
                 success: false,
                 status: 404,
-                message: "Dispatcher not found"
+                message: "Provider not found"
             })
         }
         res.status(200).json({
             success: true,
             status: 200,
-            message: "Dispatcher retrieved successfully",
-            data: dispatcher
+            message: "Provider retrieved successfully",
+            data: provider
         })
     } catch (error) {
         console.log(error);
         res.status(500).json({
             success: false,
             status: 500,
-            message: "Error retrieving dispatcher",
+            message: "Error retrieving provider",
             error: error.message
         })
     }
 }
 
-const updateDispatcher = async (req, res) => {
-    //const { message, success } = verifyToken(req, 'getOrders'); //Verificamos el token
+const updateProvider = async (req, res) => {
+    //const { message, success } = verifyToken(req, 'updateOrder'); //Verificamos el token
     const { id } = req.params;
     if (!req.body || Object.keys(req.body).length === 0) {
         return res.status(400).json({
@@ -129,67 +113,63 @@ const updateDispatcher = async (req, res) => {
             message: "Request body is required"
         })
     }
-    if (!req.body.full_name || !req.body.email || !req.body.phone) {
-        return res.status(400).json({
-            success: false,
-            status: 400,
-            message: "Full name, email and phone are required"
-        })
-    }
-    let { full_name, email, phone } = req.body;
-
+    let { name } = req.body;
     try {
-        const dispatcher = await prisma.dispatcher.update({
+        const providerExists = await prisma.provider.findUnique({
+            where: {
+                id: parseInt(id)
+            }
+        });
+        if (!providerExists) {
+            return res.status(404).json({
+                success: false,
+                status: 404,
+                message: "Provider not found"
+            })
+        }
+
+        const provider = await prisma.provider.update({
             where: {
                 id: parseInt(id)
             },
             data: {
-                full_name,
-                email,
-                phone
+                name
             }
         });
-        if (!dispatcher) {
-            return res.status(400).json({
-                success: false,
-                status: 400,
-                message: "Dispatcher not updated"
-            });
-        }
         res.status(200).json({
             success: true,
             status: 200,
-            message: "Dispatcher updated successfully",
+            message: "Provider updated successfully",
         })
-
     } catch (error) {
         console.log(error);
         res.status(500).json({
             success: false,
             status: 500,
-            message: "Dispatcher update failed",
+            message: "Error updating provider",
             error: error.message
         })
     }
 }
 
-const deleteDispatcher = async (req, res) => {
-    //const { message, success } = verifyToken(req, 'getOrders'); //Verificamos el token
+const deleteProvider = async (req, res) => {
+    //const { message, success } = verifyToken(req, 'deleteOrder'); //Verificamos el token
     const { id } = req.params;
     try {
-        const dispatcherExists = await prisma.dispatcher.findUnique({
+        const providerExists = await prisma.provider.findUnique({
             where: {
                 id: parseInt(id)
             }
         });
-        if (!dispatcherExists) {
+        if (!providerExists) {
             return res.status(404).json({
                 success: false,
                 status: 404,
-                message: "Dispatcher not found"
+                message: "Provider not found"
             })
         }
-        const dispatcher = await prisma.dispatcher.delete({
+
+        await prisma.provider.delete({
             where: {
                 id: parseInt(id)
             }
@@ -197,23 +177,24 @@ const deleteDispatcher = async (req, res) => {
         res.status(200).json({
             success: true,
             status: 200,
-            message: "Dispatcher deleted successfully",
+            message: "Provider deleted successfully",
         })
     } catch (error) {
         console.log(error);
         res.status(500).json({
             success: false,
             status: 500,
-            message: "Error deleting dispatcher",
+            message: "Error deleting provider",
             error: error.message
         })
     }
 }
 
+
 module.exports = {
-    createDispatcher,
-    getDispatchers,
-    getDispatcherById,
-    updateDispatcher,
-    deleteDispatcher
-};
+    createProvider,
+    getProviders,
+    getProviderById,
+    updateProvider,
+    deleteProvider
+}
