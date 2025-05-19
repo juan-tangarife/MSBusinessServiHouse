@@ -5,15 +5,15 @@ const e = require('express');
 
 const createManager = async (req, res) => {
     //const { message, success } = verifyToken(req, 'createOrder'); //Verificamos el token
-    if (!req.body || Object.keys(req.body).length === 0) { 
+    if (!req.body || Object.keys(req.body).length === 0) {
         return res.status(400).json({
             success: false,
             status: 400,
             message: "Request body is required"
         })
     }
-    
-    let { full_name, email, phone } = req.body; 
+
+    let { full_name, email, phone } = req.body;
     try {
         const emailExists = await prisma.manager.findUnique({
             where: {
@@ -32,7 +32,7 @@ const createManager = async (req, res) => {
             data: {
                 full_name,
                 email,
-                phone
+                phone,
             }
         });
         res.status(201).json({
@@ -42,7 +42,7 @@ const createManager = async (req, res) => {
         })
     } catch (error) {
         console.log(error);
-        
+
         res.status(500).json({
             success: false,
             status: 500,
@@ -110,14 +110,14 @@ const getManagerById = async (req, res) => {
 const updateManager = async (req, res) => {
     //const { message, success } = verifyToken(req, 'updateOrder'); //Verificamos el token
     const { id } = req.params;
-    if (!req.body || Object.keys(req.body).length === 0) { 
+    if (!req.body || Object.keys(req.body).length === 0) {
         return res.status(400).json({
             success: false,
             status: 400,
             message: "Request body is required"
         })
     }
-    let { full_name, email, phone } = req.body; 
+    let { full_name, email, phone } = req.body;
     try {
         const manager = await prisma.manager.update({
             where: {
