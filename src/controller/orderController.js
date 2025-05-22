@@ -87,6 +87,7 @@ const createOrder = async (req, res) => {
         amount: restock
           ? stock.amount + product.amount
           : stock.amount - product.amount,
+        dispatcher_id: 2
       },
       include: {
         Dispatcher: true,
@@ -94,7 +95,7 @@ const createOrder = async (req, res) => {
         Product: true,
       },
     });
-
+    
     if (stockUpdate.amount <= stockUpdate.min_amount) {
       OrderService.sendLowStockAlertEMail(
         stockUpdate.Dispatcher?.email,
@@ -164,7 +165,7 @@ const readOrder = async (req, res) => {
 const allOrders = async (req, res) => {
   //const { message, success } = verifyToken(req, 'createOrder'); //Verificamos el token
   try {
-    const orders = await prisma.order.find(); //Obtenemos todos los pedidos
+    const orders = await prisma.order.findMany(); //Obtenemos todos los pedidos
     if (!orders) {
       return res.status(400).json({
         success: false,
@@ -189,7 +190,7 @@ const allOrders = async (req, res) => {
 };
 const updateOrder = async (req, res) => {
   //const { message, success } = verifyToken(req, 'createOrder'); //Verificamos el token
-  order_number = req.params.order_number; //Obtenemos el order_number de la url
+   //Obtenemos el order_number de la url
   if (!req.body || Object.keys(req.body).length === 0) {
     return res.status(400).json({
       success: false,
@@ -212,7 +213,7 @@ const updateOrder = async (req, res) => {
       where: {
         id: delivery_id,
       },
-    });
+    });order_number = req.params.order_number;
     if (!delivery) {
       return res.status(400).json({
         success: false,
@@ -294,10 +295,127 @@ const deleteOrder = async (req, res) => {
   }
 };
 
+const getOrdersByDispatcherId = async (req, res) => {
+  dispatcher_id = req.params.dispatcher_id;
+  try{
+   const orders = await prisma.order.findMany({
+  where: {
+    stockTransactions: {
+      some: {
+        restock: true,
+        Stock: {
+          dispatcher_id: parseInt(dispatcher_id),
+        },
+      },
+    },
+  },
+  include: {
+    stockTransactions: {
+      where: {
+        restock: true,
+        Stock: {
+          dispatcher_id: parseInt(dispatcher_id),
+        },
+      },
+      include: {
+        Stock: {
+          include: {
+            Product: true,
+            Storage: true,
+          },
+        },
+      },
+    },
+  },
+});
+
+
+    if (!orders) {
+      return res.status(400).json({
+        success: false,
+        status: 400,
+        message: "Orders not found",
+      });
+    }
+    res.status(200).json({
+      success: true,
+      status: 201,
+      message: "Orders found successfully",
+      orders: orders,
+    });
+  }
+  catch (error) {
+    res.status(500).json({
+      success: false,
+      status: 500,
+      message: "Error",
+      error: error.message,
+    });
+  }
+}
+
+const getOrdersByStorageId = async (req,res) =>{
+  storage_id = req.params.storage_id;
+  try{
+   const orders = await prisma.order.findMany({
+  where: {
+    stockTransactions: {
+      some: {
+        Stock: {
+          storage_id: storage_id,
+        },
+      },
+    },
+  },
+  include: {
+    stockTransactions: {
+      where: {
+        restock: true,
+        Stock: {
+          storage_id: storage_id,
+        },
+      },
+      include: {
+        Stock: {
+          include: {
+            Product: true,
+            Storage: true,
+          },
+        },
+      },
+    },
+  },
+});
+    if (!orders) {
+      return res.status(400).json({
+        success: false,
+        status: 400,
+        message: "Orders not found",
+      });
+    }
+    res.status(200).json({
+      success: true,
+      status: 201,
+      message: "Orders found successfully",
+      orders: orders,
+    });
+  }
+  catch (error) {
+    res.status(500).json({
+      success: false,
+      status: 500,
+      message: "Error",
+      error: error.message,
+    });
+  }
+}
+
 module.exports = {
   createOrder,
   readOrder,
   allOrders,
   updateOrder,
   deleteOrder,
+  getOrdersByDispatcherId,
+  getOrdersByStorageId
 };
