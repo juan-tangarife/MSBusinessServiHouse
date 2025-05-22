@@ -170,10 +170,42 @@ const deleteManager = async (req, res) => {
     }
 }
 
+const getStorageByManagerId = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const manager = await prisma.manager.findUnique({
+            where: { id: parseInt(id) },
+            include: { Storage: true }
+        });
+        if (!manager) {
+            return res.status(404).json({
+                success: false,
+                status: 404,
+                message: "Manager not found"
+            });
+        }
+        res.status(200).json({
+            success: true,
+            status: 200,
+            message: "Storages retrieved successfully",
+            data: manager.Storage
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            success: false,
+            status: 500,
+            message: "Error retrieving storages",
+            error: error.message
+        });
+    }
+}
+
 module.exports = {
     createManager,
     getManagers,
     getManagerById,
     updateManager,
-    deleteManager
+    deleteManager,
+    getStorageByManagerId
 }
