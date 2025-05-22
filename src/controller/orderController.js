@@ -409,6 +409,35 @@ const getOrdersByStorageId = async (req,res) =>{
     });
   }
 }
+const getOrderWithDelivery = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const order = await prisma.order.findUnique({
+      where: { id: parseInt(id) },
+      include: { delivery: true }
+    });
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        status: 404,
+        message: "Order not found",
+      });
+    }
+    res.status(200).json({
+      success: true,
+      status: 200,
+      message: "Order with delivery retrieved successfully",
+      order: order,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      status: 500,
+      message: "Error retrieving order with delivery",
+      error: error.message,
+    });
+  }
+};
 
 module.exports = {
   createOrder,
@@ -417,5 +446,6 @@ module.exports = {
   updateOrder,
   deleteOrder,
   getOrdersByDispatcherId,
-  getOrdersByStorageId
+  getOrdersByStorageId,
+  getOrderWithDelivery,
 };
