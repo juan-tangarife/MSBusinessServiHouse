@@ -4,7 +4,7 @@ require("dotenv").config(); //Nos permite leer las variables de entorno
 const e = require("express");
 const orderRequest = require("../models/orderRequest"); //Importamos el modelo de la peticion
 const verifyToken = require("../middlewares/auth.js");
-const {OrderService} = require("../services/order.service");
+const { OrderService } = require("../services/order.service");
 
 const createOrder = async (req, res) => {
   //const { message,success  } = verifyToken(req, 'createOrder'); //Verificamos el token
@@ -95,7 +95,7 @@ const createOrder = async (req, res) => {
         Product: true,
       },
     });
-    
+
     if (stockUpdate.amount <= stockUpdate.min_amount) {
       OrderService.sendLowStockAlertEMail(
         stockUpdate.Dispatcher?.email,
@@ -190,7 +190,7 @@ const allOrders = async (req, res) => {
 };
 const updateOrder = async (req, res) => {
   //const { message, success } = verifyToken(req, 'createOrder'); //Verificamos el token
-   //Obtenemos el order_number de la url
+  //Obtenemos el order_number de la url
   if (!req.body || Object.keys(req.body).length === 0) {
     return res.status(400).json({
       success: false,
@@ -213,7 +213,7 @@ const updateOrder = async (req, res) => {
       where: {
         id: delivery_id,
       },
-    });order_number = req.params.order_number;
+    }); order_number = req.params.order_number;
     if (!delivery) {
       return res.status(400).json({
         success: false,
@@ -297,37 +297,37 @@ const deleteOrder = async (req, res) => {
 
 const getOrdersByDispatcherId = async (req, res) => {
   dispatcher_id = req.params.dispatcher_id;
-  try{
-   const orders = await prisma.order.findMany({
-  where: {
-    stockTransactions: {
-      some: {
-        restock: true,
-        Stock: {
-          dispatcher_id: parseInt(dispatcher_id),
-        },
-      },
-    },
-  },
-  include: {
-    stockTransactions: {
+  try {
+    const orders = await prisma.order.findMany({
       where: {
-        restock: true,
-        Stock: {
-          dispatcher_id: parseInt(dispatcher_id),
-        },
-      },
-      include: {
-        Stock: {
-          include: {
-            Product: true,
-            Storage: true,
+        stockTransactions: {
+          some: {
+            restock: true,
+            Stock: {
+              dispatcher_id: parseInt(dispatcher_id),
+            },
           },
         },
       },
-    },
-  },
-});
+      include: {
+        stockTransactions: {
+          where: {
+            restock: true,
+            Stock: {
+              dispatcher_id: parseInt(dispatcher_id),
+            },
+          },
+          include: {
+            Stock: {
+              include: {
+                Product: true,
+                Storage: true,
+              },
+            },
+          },
+        },
+      },
+    });
 
 
     if (!orders) {
@@ -354,38 +354,38 @@ const getOrdersByDispatcherId = async (req, res) => {
   }
 }
 
-const getOrdersByStorageId = async (req,res) =>{
+const getOrdersByStorageId = async (req, res) => {
   storage_id = req.params.storage_id;
-  try{
-   const orders = await prisma.order.findMany({
-  where: {
-    stockTransactions: {
-      some: {
-        Stock: {
-          storage_id: storage_id,
-        },
-      },
-    },
-  },
-  include: {
-    stockTransactions: {
+  try {
+    const orders = await prisma.order.findMany({
       where: {
-        restock: true,
-        Stock: {
-          storage_id: storage_id,
-        },
-      },
-      include: {
-        Stock: {
-          include: {
-            Product: true,
-            Storage: true,
+        stockTransactions: {
+          some: {
+            Stock: {
+              storage_id: storage_id,
+            },
           },
         },
       },
-    },
-  },
-});
+      include: {
+        stockTransactions: {
+          where: {
+            restock: true,
+            Stock: {
+              storage_id: storage_id,
+            },
+          },
+          include: {
+            Stock: {
+              include: {
+                Product: true,
+                Storage: true,
+              },
+            },
+          },
+        },
+      },
+    });
     if (!orders) {
       return res.status(400).json({
         success: false,
@@ -439,6 +439,50 @@ const getOrderWithDelivery = async (req, res) => {
   }
 };
 
+const getOrderStorage = async (req, res) => {
+  const { id } = req.params; // id de la orden
+  try {
+    const order = await prisma.order.findUnique({
+      where: { id: parseInt(id) },
+      include: {
+        stockTransactions: {
+          include: {
+            Stock: {
+              include: {
+                Storage: true
+              }
+            }
+          }
+        }
+      }
+    });
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        status: 404,
+        message: "Order not found"
+      });
+    }
+    // Extraer los storages únicos de los stockTransactions
+    const storages = order.stockTransactions
+      .map(st => st.Stock?.Storage)
+      .filter(storage => storage); // Elimina posibles undefined
+
+    res.status(200).json({
+      success: true,
+      status: 200,
+      message: "Order storages retrieved successfully",
+      storages: storages
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      status: 500,
+      message: "Error retrieving order storages",
+      error: error.message
+    });
+  }
+};
 module.exports = {
   createOrder,
   readOrder,
@@ -448,4 +492,5 @@ module.exports = {
   getOrdersByDispatcherId,
   getOrdersByStorageId,
   getOrderWithDelivery,
+  getOrderStorage
 };
