@@ -483,6 +483,37 @@ const getOrderStorage = async (req, res) => {
     });
   }
 };
+
+const getOrdersByDeliveryId = async (req, res) => {
+  const { delivery_id } = req.params;
+  try {
+    const orders = await prisma.order.findMany({
+      where: {
+        delivery_id: parseInt(delivery_id)
+      }
+    });
+    if (!orders || orders.length === 0) {
+      return res.status(404).json({
+        success: false,
+        status: 404,
+        message: "No orders found for this delivery id"
+      });
+    }
+    res.status(200).json({
+      success: true,
+      status: 200,
+      message: "Orders found successfully",
+      orders: orders
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      status: 500,
+      message: "Error retrieving orders by delivery id",
+      error: error.message
+    });
+  }
+};
 module.exports = {
   createOrder,
   readOrder,
@@ -492,5 +523,6 @@ module.exports = {
   getOrdersByDispatcherId,
   getOrdersByStorageId,
   getOrderWithDelivery,
-  getOrderStorage
+  getOrderStorage,
+  getOrdersByDeliveryId
 };
