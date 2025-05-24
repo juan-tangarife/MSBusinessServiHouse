@@ -106,9 +106,9 @@ model Manager {
   id        Int       @id @default(autoincrement())
   user_id   String
   full_name String
-  state   String
-  email     String @unique
-  phone     String    
+  state     String
+  email     String    @unique
+  phone     String
   Storage   Storage[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @default(now()) @updatedAt
@@ -134,10 +134,10 @@ model MessageTemplates {
 }
 
 model Provider {
-  id        String   @id
-  name     String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
+  id               String            @id
+  name             String
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @default(now()) @updatedAt
   providerProducts ProviderProduct[]
 }
 
