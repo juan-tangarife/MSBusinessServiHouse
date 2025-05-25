@@ -1,5 +1,5 @@
 class orderRequest {
-    constructor(address, city, department, altitude, latitude, products, restock) {
+    constructor(address, city, department, altitude, latitude, products, restock, email, phone) {
         this.address = address;
         this.city = city;
         this.department = department;
@@ -7,12 +7,20 @@ class orderRequest {
         this.latitude = latitude;
         this.products = products;
         this.restock = restock;
+        this.email = email;
+        this.phone = phone;
     }
   
     static validate(data) {
-        const {address, city, department, altitude, latitude, products, restock} = data;
+        const {address, city, department, altitude, latitude, products, restock, email, phone} = data;
         const errors = [];
-  
+        
+        if (!email) {
+            errors.push("Email is required");
+        }
+        if (!phone) {
+            errors.push("Phone is required");
+        }
         if (!address) {
             errors.push("Address is required");
         }

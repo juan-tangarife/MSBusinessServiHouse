@@ -24,7 +24,7 @@ const createOrder = async (req, res) => {
     });
   }
 
-  let { address, city, department, altitude, latitude, products, restock } =
+  let { address, city, department, altitude, latitude, products, restock, phone, email } =
     req.body;
   let order_number = Math.random().toString(36).substring(2, 10);
   let delivery_id = 1;
@@ -62,6 +62,8 @@ const createOrder = async (req, res) => {
       order_number: order_number,
       delivery_id: delivery_id,
       final_address_id: location.id,
+      email: email,
+      phone: phone,
     },
   });
   products.map(async (product) => {
