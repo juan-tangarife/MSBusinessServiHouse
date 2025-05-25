@@ -26,7 +26,7 @@ const createOrder = async (req, res) => {
 
   let { address, city, department, altitude, latitude, products, restock } =
     req.body;
-  let order_number = String(Math.floor(Math.random() * 1000000)); //Generamos un numero de pedido aleatorio
+  let order_number = Math.random().toString(36).substring(2, 10);
   let delivery_id = 1;
   const location = await prisma.location.upsert({
     where: {
