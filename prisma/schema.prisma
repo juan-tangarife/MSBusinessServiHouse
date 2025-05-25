@@ -56,6 +56,7 @@ model Delivery {
   user_id     String?
   full_name   String
   location_id Int
+  email       String
   pending_orders Int   @default(0)
   orders      Order[]
   location    Location @relation(fields: [location_id], references: [id])
