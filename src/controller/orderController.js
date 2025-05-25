@@ -26,8 +26,11 @@ const createOrder = async (req, res) => {
 
   let { address, city, department, altitude, latitude, products, restock, phone, email } =
     req.body;
-  let order_number = Math.random().toString(36).substring(2, 10);
-  let delivery_id = 1;
+  const prefix = "ORD";
+  const timestamp = Date.now().toString(36); // base36 del timestamp actual
+  const randomPart = Math.random().toString(36).substring(2, 18); // 16 caracteres aleatorios
+  let order_number = `${prefix}-${timestamp}-${randomPart}`;
+  let delivery_id = await OrderService.getDeliveryToOrder(order_number, latitude, altitude);
   const location = await prisma.location.upsert({
     where: {
       latitude_altitude: {
