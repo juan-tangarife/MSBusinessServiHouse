@@ -4,7 +4,6 @@ require("dotenv").config(); //Nos permite leer las variables de entorno
 const express = require('express');
 
 const createDelivery = async (req, res) => {
-    console.log(req.body);
     //const { message, success } = verifyToken(req, 'createOrder'); //Verificamos el token
     if (!req.body || Object.keys(req.body).length === 0) { 
         return res.status(400).json({
@@ -14,7 +13,7 @@ const createDelivery = async (req, res) => {
         })
     }
     
-    let { full_name, location_id } = req.body; 
+    let { full_name, location_id, email} = req.body; 
     try {
         const location = await prisma.location.findFirst({
             where: {
@@ -31,7 +30,8 @@ const createDelivery = async (req, res) => {
         const delivery = await prisma.delivery.create({
             data: {
                 full_name, 
-                location_id
+                location_id,
+                email
             },
         });
         res.status(201).json({

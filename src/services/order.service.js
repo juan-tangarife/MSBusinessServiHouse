@@ -56,6 +56,32 @@ class OrderService{
         }
     }
 
+    getDeliveryToOrder = async (order_number, latitude, altitude) => {
+        const msDeliveryURL = process.env.GEOLOCALIZATION_URL + "/api/geolocalization/maporders/asignOrderToDelivery";
+        const token = generateApiToken();
+        const data = {
+            order_number: order_number,
+            latitude: latitude,
+            altitude: altitude
+        };
+        const headers = {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+        };
+        const response = await fetch(msDeliveryURL, {
+            method: "POST",
+            headers: headers,
+            body: JSON.stringify(data)
+        });
+        if (!response.ok) {
+            console.error("Error getting delivery:", response.statusText);
+            return null;
+        } else {
+            const deliveryData = await response.json();
+            return deliveryData.delivery.id;
+        }
+    }
+
 }
 
 
