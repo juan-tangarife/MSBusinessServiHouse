@@ -33,6 +33,7 @@ const createManager = async (req, res) => {
                 full_name,
                 email,
                 phone,
+                user_id,
                 state: "active"
             }
         });
@@ -201,6 +202,68 @@ const getStorageByManagerId = async (req, res) => {
         });
     }
 }
+const getManagerByUserId = async (req, res) => {
+    const { user_id } = req.params;
+    try {
+        const manager = await prisma.manager.findFirst({
+            where: { user_id: user_id }
+        });
+        if (!manager) {
+            return res.status(404).json({
+                success: false,
+                status: 404,
+                message: "Manager not found"
+            });
+        }
+        res.status(200).json({
+            success: true,
+            status: 200,
+            message: "Manager retrieved successfully",
+            data: manager
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            success: false,
+            status: 500,
+            message: "Error retrieving manager",
+            error: error.message
+        });
+    }
+}
+const updateManagerUserId = async (req, res) => {
+    const { id } = req.params;
+    const { user_id } = req.body;
+
+    if (!user_id) {
+        return res.status(400).json({
+            success: false,
+            status: 400,
+            message: "user_id is required"
+        });
+    }
+
+    try {
+        const manager = await prisma.manager.update({
+            where: { id: parseInt(id) },
+            data: { user_id }
+        });
+        res.status(200).json({
+            success: true,
+            status: 200,
+            message: "Manager user_id updated successfully",
+            data: manager
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            success: false,
+            status: 500,
+            message: "Error updating manager user_id",
+            error: error.message
+        });
+    }
+}
 
 module.exports = {
     createManager,
@@ -208,5 +271,7 @@ module.exports = {
     getManagerById,
     updateManager,
     deleteManager,
-    getStorageByManagerId
+    getStorageByManagerId,
+    getManagerByUserId,
+    updateManagerUserId
 }
