@@ -9,14 +9,14 @@ datasource db {
 
 model Order {
   id                Int                @id @default(autoincrement())
-  order_number      String           @unique  
+  order_number      String             @unique
   delivery_id       Int
   final_address_id  Int
   state             String             @default("PENDING")
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @default(now()) @updatedAt
-  email           String?     
-  phone           String?
+  email             String?
+  phone             String?
   stockTransactions StockTransaction[]
   delivery          Delivery           @relation(fields: [delivery_id], references: [id])
   final_address     Location           @relation(fields: [final_address_id], references: [id])
@@ -52,14 +52,14 @@ model StockTransaction {
 }
 
 model Delivery {
-  id          Int      @id @default(autoincrement())
-  user_id     String?
-  full_name   String
-  location_id Int
-  email       String?
-  pending_orders Int   @default(0)
-  orders      Order[]
-  location    Location @relation(fields: [location_id], references: [id])
+  id             Int      @id @default(autoincrement())
+  user_id        String?
+  full_name      String
+  location_id    Int
+  email          String?
+  pending_orders Int      @default(0)
+  orders         Order[]
+  location       Location @relation(fields: [location_id], references: [id])
 }
 
 model Location {

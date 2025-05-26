@@ -13,7 +13,7 @@ const createDelivery = async (req, res) => {
         })
     }
     
-    let { full_name, location_id, email} = req.body; 
+    let { user_id, full_name, location_id, email} = req.body; 
     try {
         const location = await prisma.location.findFirst({
             where: {
@@ -29,6 +29,7 @@ const createDelivery = async (req, res) => {
         }
         const delivery = await prisma.delivery.create({
             data: {
+                user_id,
                 full_name, 
                 location_id,
                 email
