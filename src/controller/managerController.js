@@ -33,6 +33,7 @@ const createManager = async (req, res) => {
                 full_name,
                 email,
                 phone,
+                state: "active"
             }
         });
         res.status(201).json({
