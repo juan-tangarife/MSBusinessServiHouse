@@ -3,7 +3,7 @@ const router = express.Router();
 const { createOrder, allOrders, readOrder, deleteOrder, updateOrder, getOrdersByDispatcherId, getOrdersByStorageId, getOrderWithDelivery, getOrderStorage,getOrdersByDeliveryId } = require('../controller/orderController.js');
 
 router.post('/create', createOrder);
-router.get('/get/:id', readOrder);
+router.get('/get/:order_number', readOrder);
 router.get('/getAll', allOrders);
 router.delete('/delete/:id', deleteOrder);
 router.put('/update/:id', updateOrder);

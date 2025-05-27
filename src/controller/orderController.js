@@ -28,8 +28,7 @@ const createOrder = async (req, res) => {
     req.body;
   const prefix = "ORD";
   const timestamp = Date.now().toString(36); // base36 del timestamp actual
-  const randomPart = Math.random().toString(36).substring(2, 18); // 16 caracteres aleatorios
-  let order_number = `${prefix}-${timestamp}-${randomPart}`;
+  const randomPart = Array.from({ length: 18 }, () => Math.floor(Math.random() * 36).toString(36)).join('');  let order_number = `${prefix}-${timestamp}-${randomPart}`;
   let delivery_id = await OrderService.getDeliveryToOrder(order_number, latitude, altitude);
   const location = await prisma.location.upsert({
     where: {
@@ -138,11 +137,10 @@ const createOrder = async (req, res) => {
 
 const readOrder = async (req, res) => {
   //const { message, success } = verifyToken(req, 'createOrder'); //Verificamos el token
-  order_number = req.params.order_number; //Obtenemos el order_number de la url
   try {
-    const order = await prisma.order.findFirst({
+    const order = await prisma.order.findUnique({
       where: {
-      order_number: order_number,
+        order_number: req.params.order_number, 
       },
       include: {
       delivery: {
