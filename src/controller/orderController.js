@@ -142,7 +142,15 @@ const readOrder = async (req, res) => {
   try {
     const order = await prisma.order.findFirst({
       where: {
-        order_number: order_number,
+      order_number: order_number,
+      },
+      include: {
+      delivery: {
+        include: {
+        location: true, 
+        },
+      },
+      final_address: true,
       },
     });
     if (!order) {
