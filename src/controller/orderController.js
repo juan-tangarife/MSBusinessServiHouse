@@ -127,6 +127,12 @@ const createOrder = async (req, res) => {
       message: "Order not created",
     });
   }
+  // Enviar correo de confirmación de pedido
+  OrderService.sendCreateOrderEmail(
+    email,
+    order_number,
+    'Dear'
+  );
   res.status(201).json({
     success: true,
     status: 201,

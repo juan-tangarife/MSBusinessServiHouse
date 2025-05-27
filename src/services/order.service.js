@@ -56,6 +56,30 @@ class OrderService{
         }
     }
 
+    sendCreateOrderEmail = async (email, order_number, name) => {
+        const msNotificationURL = process.env.GATEWAY_URL + "/api/notification/email/CreateOrder";
+        const token = generateApiToken();
+        const data = {
+            email: email,
+            order_number: order_number,
+            name: name
+        };
+        const headers = {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+        };
+        const response = await fetch(msNotificationURL, {
+            method: "POST",
+            headers: headers,
+            body: JSON.stringify(data)
+        });
+        if (!response.ok) {
+            console.error("Error sending email:", response.statusText);
+        } else {
+            console.log("Email sent successfully");
+        }
+    }
+
     getDeliveryToOrder = async (order_number, latitude, altitude) => {
         const msDeliveryURL = process.env.GEOLOCALIZATION_URL + "/api/geolocalization/maporders/asignOrderToDelivery";
         const token = generateApiToken();
