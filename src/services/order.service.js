@@ -57,7 +57,7 @@ class OrderService{
     }
 
     sendCreateOrderEmail = async (email, order_number, name) => {
-        const msNotificationURL = process.env.GATEWAY_URL + "/api/notification/email/CreateOrder";
+        const msNotificationURL = process.env.GATEWAY_URL + "/api/notification/email/OrderCreated";
         const token = generateApiToken();
         const data = {
             email: email,
