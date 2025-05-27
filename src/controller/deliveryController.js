@@ -56,7 +56,12 @@ const createDelivery = async (req, res) => {
 const getDeliveries = async (req, res) => {
     //const { message, success } = verifyToken(req, 'getOrders'); //Verificamos el token
     try {
-        const deliveries = await prisma.delivery.findMany();
+        const deliveries = await prisma.delivery.findMany({
+            include: {  
+                location: true 
+            },
+        }
+        );
         res.status(200).json({
             success: true,
             status: 200,
