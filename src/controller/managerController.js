@@ -13,7 +13,7 @@ const createManager = async (req, res) => {
         })
     }
 
-    let { full_name, email, phone } = req.body;
+    let { user_id, full_name, email, phone } = req.body;
     try {
         const emailExists = await prisma.manager.findUnique({
             where: {
@@ -74,7 +74,6 @@ const getManagers = async (req, res) => {
         })
     }
 }
-
 
 const getManagerById = async (req, res) => {
     //const { message, success } = verifyToken(req, 'getOrders'); //Verificamos el token
@@ -150,10 +149,35 @@ const updateManager = async (req, res) => {
 const deleteManager = async (req, res) => {
     //const { message, success } = verifyToken(req, 'deleteOrder'); //Verificamos el token
     const { id } = req.params;
+    const { email } = req.body;
     try {
-        const manager = await prisma.manager.delete({
+        let managerId = id;
+        if(!managerId && email){
+            const manager = await prisma.manager.findFirst({
+                where:{
+                    email: email
+                }
+            })
+            if(!manager){
+                 return res.status(404).json({
+                    success: false,
+                    status: 404,
+                    message: "Manager with that email not found",
+                });
+            }
+
+            managerId = manager.id;
+        }
+        if(!managerId){
+            return res.status(400).json({
+                success: false,
+                status: 400,
+                message: "Manager ID or email is required",
+            });
+        }
+        await prisma.manager.delete({
             where: {
-                id: parseInt(id)
+                id: parseInt(managerId)
             }
         });
         res.status(200).json({

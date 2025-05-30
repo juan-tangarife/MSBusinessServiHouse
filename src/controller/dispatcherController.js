@@ -19,7 +19,7 @@ const createDispatcher = async (req, res) => {
             message: "Full name, email and phone are required"
         })
     }
-    let { full_name, email, phone } = req.body;
+    let { user_id, full_name, email, phone } = req.body;
 
     try {
 
@@ -37,6 +37,7 @@ const createDispatcher = async (req, res) => {
         }
         const dispatcher = await prisma.dispatcher.create({
             data: {
+                user_id,
                 full_name, 
                 email,
                 phone
@@ -176,22 +177,35 @@ const updateDispatcher = async (req, res) => {
 const deleteDispatcher = async (req, res) => {
     //const { message, success } = verifyToken(req, 'getOrders'); //Verificamos el token
     const { id } = req.params;
+    const { email } = req.body;
+
     try {
-        const dispatcherExists = await prisma.dispatcher.findUnique({
-            where: {
-                id: parseInt(id)
-            }
-        });
-        if (!dispatcherExists) {
-            return res.status(404).json({
-                success: false,
-                status: 404,
-                message: "Dispatcher not found"
+        let dispatcherId = id;
+        if(!dispatcherId && email){
+            const dispatcher = await prisma.dispatcher.findFirst({
+                where:{
+                    email: email
+                }
             })
+            if(!dispatcher){
+                 return res.status(404).json({
+                    success: false,
+                    status: 404,
+                    message: "Dispatcher with that email not found",
+                });
+            }
+            dispatcherId = dispatcher.id;
         }
-        const dispatcher = await prisma.dispatcher.delete({
+        if(!dispatcherId){
+            return res.status(400).json({
+                success: false,
+                status: 400,
+                message: "Dispatcher ID or email is required",
+            });
+        }
+        await prisma.dispatcher.delete({
             where: {
-                id: parseInt(id)
+                id: parseInt(dispatcherId)
             }
         });
         res.status(200).json({

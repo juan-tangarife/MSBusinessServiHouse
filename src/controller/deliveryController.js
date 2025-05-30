@@ -158,22 +158,35 @@ const updateDelivery = async (req, res) => {
 const deleteDelivery = async (req, res) => {
     //const { message, success } = verifyToken(req, 'getOrders'); //Verificamos el token
     const { id } = req.params;
+    const { email } = req.body;
     try {
-        const deliveryExists = await prisma.delivery.findUnique({
-            where: {
-                id: parseInt(id)
-            }
-        });
-        if (!deliveryExists) {
-            return res.status(404).json({
-                success: false,
-                status: 404,
-                message: "Delivery not found"
+        let deliveryId = id;
+        if(!deliveryId && email){
+            const delivery = await prisma.delivery.findFirst({
+                where:{
+                    email: email
+                }
             })
+            if(!delivery){
+                 return res.status(404).json({
+                    success: false,
+                    status: 404,
+                    message: "Delivery with that email not found",
+                });
+            }
+
+            deliveryId = delivery.id;
+        }
+        if(!deliveryId){
+            return res.status(400).json({
+                success: false,
+                status: 400,
+                message: "Delivery ID or email is required",
+            });
         }
         await prisma.delivery.delete({
             where: {
-                id: parseInt(id)
+                id: parseInt(deliveryId)
             }
         });
         res.status(200).json({

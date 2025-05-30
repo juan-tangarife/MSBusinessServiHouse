@@ -8,5 +8,6 @@ router.get('/get', getDeliveries);
 router.get('/get/:id', getDeliveryById);
 router.put('/update/:id', updateDelivery);
 router.delete('/delete/:id', deleteDelivery);
+router.delete('/delete', deleteDelivery);
 
 module.exports = router;
