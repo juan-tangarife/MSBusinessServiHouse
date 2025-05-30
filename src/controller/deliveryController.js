@@ -205,12 +205,42 @@ const deleteDelivery = async (req, res) => {
     }
 }
 
+const getDeliveryByUserId = async (req, res) => {
+    const { user_id } = req.params;
+    try {
+        const delivery = await prisma.delivery.findFirst({
+            where: { user_id: user_id }
+        });
+        if (!delivery) {
+            return res.status(404).json({
+                success: false,
+                status: 404,
+                message: "Delivery not found"
+            });
+        }
+        res.status(200).json({
+            success: true,
+            status: 200,
+            message: "Delivery retrieved successfully",
+            data: delivery
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            success: false,
+            status: 500,
+            message: "Error retrieving delivery",
+            error: error.message
+        });
+    }
+}
+
 
 module.exports = {
     createDelivery,
     getDeliveries,
     getDeliveryById,
     updateDelivery,
-    deleteDelivery
-    
+    deleteDelivery,
+    getDeliveryByUserId
 };

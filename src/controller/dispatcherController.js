@@ -137,7 +137,7 @@ const updateDispatcher = async (req, res) => {
             message: "Full name, email and phone are required"
         })
     }
-    let { full_name, email, phone } = req.body;
+    let { user_id, full_name, email, phone } = req.body;
 
     try {
         const dispatcher = await prisma.dispatcher.update({
@@ -145,6 +145,7 @@ const updateDispatcher = async (req, res) => {
                 id: parseInt(id)
             },
             data: {
+                user_id,
                 full_name,
                 email,
                 phone
@@ -260,11 +261,42 @@ const getStockByDispatcher = async (req, res) => {
     }
 }
 
+const getDispatcherByUserId = async (req, res) => {
+    const { user_id } = req.params;
+    try {
+        const dispatcher = await prisma.dispatcher.findFirst({
+            where: { user_id: user_id }
+        });
+        if (!dispatcher) {
+            return res.status(404).json({
+                success: false,
+                status: 404,
+                message: "Dispatcher not found"
+            });
+        }
+        res.status(200).json({
+            success: true,
+            status: 200,
+            message: "Dispatcher retrieved successfully",
+            data: dispatcher
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            success: false,
+            status: 500,
+            message: "Error retrieving dispatcher",
+            error: error.message
+        });
+    }
+}
+
 module.exports = {
     createDispatcher,
     getDispatchers,
     getDispatcherById,
     updateDispatcher,
     deleteDispatcher,
-    getStockByDispatcher
+    getStockByDispatcher,
+    getDispatcherByUserId
 };

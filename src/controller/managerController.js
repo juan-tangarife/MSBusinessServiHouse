@@ -230,7 +230,10 @@ const getManagerByUserId = async (req, res) => {
     const { user_id } = req.params;
     try {
         const manager = await prisma.manager.findFirst({
-            where: { user_id: user_id }
+            where: { user_id: user_id },
+            include:{
+                Storage: true
+            }
         });
         if (!manager) {
             return res.status(404).json({
