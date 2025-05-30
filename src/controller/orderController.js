@@ -182,7 +182,56 @@ const readOrder = async (req, res) => {
 const allOrders = async (req, res) => {
   //const { message, success } = verifyToken(req, 'createOrder'); //Verificamos el token
   try {
-    const orders = await prisma.order.findMany(); //Obtenemos todos los pedidos
+    const orders = await prisma.order.findMany({
+      include: {
+        stockTransactions: {
+          include: {
+            Stock: {
+              include: {
+                Storage: {
+                  include: {
+                    location: true
+                  }
+                }
+              }
+            }
+          }
+        },
+        delivery: {
+          include: {
+            location: true
+          }
+        },
+        final_address: true
+      }
+    }); //Obtenemos todos los pedidos
+    const ordersWithLocation = orders.map(order => {
+      let location = null;
+      if (order.state === "PENDING") {
+        // Tomar la location del primer storage relacionado
+        location = order.stockTransactions[0]?.Stock?.Storage?.location || null;
+      } else if (order.state === "PICKED UP") {
+        location = order.delivery?.location || null;
+      } else if (order.state === "DELIVERED") {
+        location = order.final_address || null;
+      }
+      const actualOrder = {
+        id: order.id,
+        order_number: order.order_number,
+        delivery: order.delivery.full_name,
+        storage: order.stockTransactions[0]?.Stock?.Storage.name,
+        state: order.state,
+        createdAt: order.createdAt,
+        updatedAt: order.updatedAt,
+        email: order.email,
+        phone: order.phone,
+      }
+      return {
+        order: actualOrder,
+        location
+      };
+    });
+
     if (!orders) {
       return res.status(400).json({
         success: false,
@@ -194,7 +243,7 @@ const allOrders = async (req, res) => {
       success: true,
       status: 201,
       message: "Orders found successfully",
-      orders: orders,
+      orders: ordersWithLocation,
     });
   } catch (error) {
     res.status(500).json({
@@ -328,22 +377,51 @@ const getOrdersByDispatcherId = async (req, res) => {
       },
       include: {
         stockTransactions: {
-          where: {
-            restock: true,
-            Stock: {
-              dispatcher_id: parseInt(dispatcher_id),
-            },
-          },
           include: {
             Stock: {
               include: {
-                Product: true,
-                Storage: true,
-              },
-            },
-          },
+                Storage: {
+                  include: {
+                    location: true
+                  }
+                }
+              }
+            }
+          }
         },
+        delivery: {
+          include: {
+            location: true
+          }
+        },
+        final_address: true
       },
+    });
+    const ordersWithLocation = orders.map(order => {
+      let location = null;
+      if (order.state === "PENDING") {
+        // Tomar la location del primer storage relacionado
+        location = order.stockTransactions[0]?.Stock?.Storage?.location || null;
+      } else if (order.state === "PICKED UP") {
+        location = order.delivery?.location || null;
+      } else if (order.state === "DELIVERED") {
+        location = order.final_address || null;
+      }
+      const actualOrder = {
+        id: order.id,
+        order_number: order.order_number,
+        delivery: order.delivery.full_name,
+        storage: order.stockTransactions[0]?.Stock?.Storage.name,
+        state: order.state,
+        createdAt: order.createdAt,
+        updatedAt: order.updatedAt,
+        email: order.email,
+        phone: order.phone,
+      }
+      return {
+        order: actualOrder,
+        location
+      };
     });
 
 
@@ -358,7 +436,7 @@ const getOrdersByDispatcherId = async (req, res) => {
       success: true,
       status: 201,
       message: "Orders found successfully",
-      orders: orders,
+      orders: ordersWithLocation,
     });
   }
   catch (error) {
@@ -386,23 +464,54 @@ const getOrdersByStorageId = async (req, res) => {
       },
       include: {
         stockTransactions: {
-          where: {
-            restock: true,
-            Stock: {
-              storage_id: storage_id,
-            },
-          },
           include: {
             Stock: {
               include: {
-                Product: true,
-                Storage: true,
-              },
-            },
-          },
+                Storage: {
+                  include: {
+                    location: true
+                  }
+                }
+              }
+            }
+          }
         },
+        delivery: {
+          include: {
+            location: true
+          }
+        },
+        final_address: true
       },
     });
+
+    const ordersWithLocation = orders.map(order => {
+      let location = null;
+      if (order.state === "PENDING") {
+        // Tomar la location del primer storage relacionado
+        location = order.stockTransactions[0]?.Stock?.Storage?.location || null;
+      } else if (order.state === "PICKED UP") {
+        location = order.delivery?.location || null;
+      } else if (order.state === "DELIVERED") {
+        location = order.final_address || null;
+      }
+      const actualOrder = {
+        id: order.id,
+        order_number: order.order_number,
+        delivery: order.delivery.full_name,
+        storage: order.stockTransactions[0]?.Stock?.Storage.name,
+        state: order.state,
+        createdAt: order.createdAt,
+        updatedAt: order.updatedAt,
+        email: order.email,
+        phone: order.phone,
+      }
+      return {
+        order: actualOrder,
+        location
+      };
+    });
+
     if (!orders) {
       return res.status(400).json({
         success: false,
@@ -414,7 +523,7 @@ const getOrdersByStorageId = async (req, res) => {
       success: true,
       status: 201,
       message: "Orders found successfully",
-      orders: orders,
+      orders: ordersWithLocation,
     });
   }
   catch (error) {
@@ -507,8 +616,56 @@ const getOrdersByDeliveryId = async (req, res) => {
     const orders = await prisma.order.findMany({
       where: {
         delivery_id: parseInt(delivery_id)
-      }
+      },
+      include: {
+        stockTransactions: {
+          include: {
+            Stock: {
+              include: {
+                Storage: {
+                  include: {
+                    location: true
+                  }
+                }
+              }
+            }
+          }
+        },
+        delivery: {
+          include: {
+            location: true
+          }
+        },
+        final_address: true
+      },
     });
+    const ordersWithLocation = orders.map(order => {
+      let location = null;
+      if (order.state === "PENDING") {
+        // Tomar la location del primer storage relacionado
+        location = order.stockTransactions[0]?.Stock?.Storage?.location || null;
+      } else if (order.state === "PICKED UP") {
+        location = order.delivery?.location || null;
+      } else if (order.state === "DELIVERED") {
+        location = order.final_address || null;
+      }
+      const actualOrder = {
+        id: order.id,
+        order_number: order.order_number,
+        delivery: order.delivery.full_name,
+        storage: order.stockTransactions[0]?.Stock?.Storage.name,
+        state: order.state,
+        createdAt: order.createdAt,
+        updatedAt: order.updatedAt,
+        email: order.email,
+        phone: order.phone,
+      }
+      return {
+        order: actualOrder,
+        location
+      };
+    });
+
     if (!orders || orders.length === 0) {
       return res.status(404).json({
         success: false,
@@ -520,7 +677,7 @@ const getOrdersByDeliveryId = async (req, res) => {
       success: true,
       status: 200,
       message: "Orders found successfully",
-      orders: orders
+      orders: ordersWithLocation
     });
   } catch (error) {
     res.status(500).json({
