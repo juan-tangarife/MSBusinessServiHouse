@@ -152,14 +152,14 @@ const deleteManager = async (req, res) => {
     const { email } = req.body;
     try {
         let managerId = id;
-        if(!managerId && email){
+        if (!managerId && email) {
             const manager = await prisma.manager.findFirst({
-                where:{
+                where: {
                     email: email
                 }
             })
-            if(!manager){
-                 return res.status(404).json({
+            if (!manager) {
+                return res.status(404).json({
                     success: false,
                     status: 404,
                     message: "Manager with that email not found",
@@ -168,7 +168,7 @@ const deleteManager = async (req, res) => {
 
             managerId = manager.id;
         }
-        if(!managerId){
+        if (!managerId) {
             return res.status(400).json({
                 success: false,
                 status: 400,
@@ -200,10 +200,35 @@ const getStorageByManagerId = async (req, res) => {
     const { id } = req.params;
     try {
         const manager = await prisma.manager.findUnique({
-            where: { id: parseInt(id) },
-            include: { Storage: true }
+            where: { user_id: id },
         });
         if (!manager) {
+            return res.status(404).json({
+                success: false,
+                status: 404,
+                message: "Manager not found"
+            });
+        }
+        const storages = await prisma.storage.findMany({
+            where: { manager_id: manager.id },
+            include: {
+                manager: {
+                    select: {
+                        full_name: true,
+                    },
+                },
+                location: {
+                    select: {
+                        address: true,
+                        department: true,
+                        city: true,
+                        latitude: true,
+                        altitude: true,
+                    },
+                },
+            }   
+        });
+        if (!storages) {
             return res.status(404).json({
                 success: false,
                 status: 404,
@@ -214,7 +239,7 @@ const getStorageByManagerId = async (req, res) => {
             success: true,
             status: 200,
             message: "Storages retrieved successfully",
-            data: manager.Storage
+            data: storages
         });
     } catch (error) {
         console.log(error);
@@ -231,7 +256,7 @@ const getManagerByUserId = async (req, res) => {
     try {
         const manager = await prisma.manager.findFirst({
             where: { user_id: user_id },
-            include:{
+            include: {
                 Storage: true
             }
         });
