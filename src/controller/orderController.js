@@ -688,6 +688,52 @@ const getOrdersByDeliveryId = async (req, res) => {
     });
   }
 };
+
+const changeOrderState = async (req, res) => {
+  const { id } = req.params; 
+  const { state } = req.body; 
+  try {
+    if (!state || !["PENDING", "PICKED UP", "DELIVERED"].includes(state)) {
+      return res.status(400).json({
+        success: false,
+        status: 400,
+        message: "Invalid state provided"
+      });
+    }
+    const order = await prisma.order.update({
+      where: { id: parseInt(id) },
+      data: { state: state }
+    });
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        status: 404,
+        message: "Order not found"
+      });
+    }
+    if (state === "DELIVERED")
+    {
+      const delivery = await prisma.delivery.update({
+        where: { id: order.delivery_id },
+        data: { pending_orders: { decrement: 1 } }
+      });
+    }
+    res.status(200).json({
+      success: true,
+      status: 200,
+      message: "Order state updated successfully",
+      order: order
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      status: 500,
+      message: "Error updating order state",
+      error: error.message
+    });
+  }
+};
+
 module.exports = {
   createOrder,
   readOrder,
@@ -698,5 +744,6 @@ module.exports = {
   getOrdersByStorageId,
   getOrderWithDelivery,
   getOrderStorage,
-  getOrdersByDeliveryId
+  getOrdersByDeliveryId,
+  changeOrderState
 };
