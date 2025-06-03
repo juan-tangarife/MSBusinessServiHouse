@@ -16,7 +16,7 @@ app.use(cors(
 )); 
 app.use(express.json());
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
-app.listen(port, () => {
+app.listen(port, '0.0.0.0',() => {
     console.log(`Project running ${port}`); 
 });
 connectDB();

@@ -6,6 +6,12 @@ services:
         BUILDPLATFORM: linux/arm64
     platform: linux/arm64
     ports:
-      - "${PORT}:${PORT}"
+      - "8090:8090"
     env_file:
       - .env
+    networks:
+      - gateway-network
+
+networks:
+  gateway-network:
+    external: true
